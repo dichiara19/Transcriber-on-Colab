@@ -4,6 +4,7 @@ import yt_dlp
 import whisper
 import requests
 import time
+import torch
 from IPython.display import clear_output
 from google.colab import files
 
@@ -44,11 +45,11 @@ print("6) German")
 
 language_options = {
     '1': None,   # Auto-detect
-    '2': 'en',   # English
-    '3': 'it',   # Italian
-    '4': 'es',   # Spanish
-    '5': 'fr',   # French
-    '6': 'de'    # German
+    '2': 'en',
+    '3': 'it',
+    '4': 'es',
+    '5': 'fr',
+    '6': 'de'    
 }
 
 while True:
@@ -127,12 +128,16 @@ while True:
 print_header("Transcription in Progress")
 print("Please wait while your audio is being transcribed...\n")
 
+# Check GPU avalability
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Dispositivo di calcolo: {device}")
+
 if transcription_engine == 'Whisper AI':
     model = whisper.load_model('large')
     if language:
-        result = model.transcribe(audio_path, language=language)
+        result = model.transcribe(audio_path, language=language, device=device)
     else:
-        result = model.transcribe(audio_path)
+        result = model.transcribe(audio_path, device=device)
     transcription = result['text']
     summary = ""  # Whisper does not generate summary
 elif transcription_engine == 'AssemblyAI':
